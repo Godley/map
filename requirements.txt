@@ -1,0 +1,5 @@
+django==1.10.6
+django-cors-headers==2.0.2
+django-geoposition==0.3.0
+django-tastypie==0.13.3
+djangorestframework==3.6.2
