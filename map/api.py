@@ -1,6 +1,7 @@
 from tastypie.resources import ModelResource, ALL
 from map.models import Journey, Stay, Activity, Location
 from tastypie import fields
+from tastypie.authentication import SessionAuthentication
 
 class LocationResource(ModelResource):
     class Meta:
@@ -15,15 +16,18 @@ class JourneyResource(ModelResource):
         filtering = {
             'method': ALL
         }
+        authentication = SessionAuthentication()
 
 
 class StayResource(ModelResource):
     class Meta:
         queryset = Stay.objects.all()
         resource_name = 'hotel'
+        authentication = SessionAuthentication()
 
 
 class ActivityResource(ModelResource):
     class Meta:
         queryset = Activity.objects.all()
         resource_name = 'activity'
+        authentication = SessionAuthentication()

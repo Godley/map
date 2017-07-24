@@ -20,16 +20,8 @@ from tastypie.api import Api
 from django.conf.urls import url, include
 from django.views.generic import TemplateView
 from django.views.decorators.csrf import csrf_exempt
-from map.views import index
-
-
-v1_api = Api(api_name='v1')
-v1_api.register(JourneyResource())
-v1_api.register(StayResource())
-v1_api.register(ActivityResource())
+from .views import index
 
 urlpatterns = [
-    url(r'^app/', index),
-    url(r'^admin/', include(admin.site.urls)),
-    url(r'^api/', include(v1_api.urls)),
+    url(r'/', index),
 ]

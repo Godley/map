@@ -26,6 +26,7 @@ class Journey(models.Model):
 class Stay(Location):
     datetime = models.DateTimeField()
     duration = models.DurationField()
+    link = models.URLField(default="https://airbnb.co.uk")
 
 
 class Activity(Location):
