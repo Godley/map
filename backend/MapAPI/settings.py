@@ -21,13 +21,13 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = ')8-p*)xs@os8ykmo#!7^zmsb==kk(ro601qaef#)qmj=phpk6k'
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = ["cgtravel.now.sh", "127.0.0.1"]
-GEOPOSITION_GOOGLE_MAPS_API_KEY = 'AIzaSyBwngOkebVJTJnNwHG5yBb977akONUseq4'
+GEOPOSITION_GOOGLE_MAPS_API_KEY = os.environ.get('GMAPS_KEY')
 
 # Application definition
 
