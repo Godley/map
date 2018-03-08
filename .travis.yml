@@ -16,6 +16,6 @@ env:
   - PG_HOST='ec2-79-125-117-53.eu-west-1.compute.amazonaws.com'
   - PG_PORT='5432'
   - secure: cvHO/75H5x0vUFjYHGfh6L3nnY6X5yZDmx/biuKRc/k8v8bYrqAUR6aB7EwQY1cgbjJNmy8P9TogJYvfr2VUpTs/nytDQ4MRkOhwdf/BHI/3UV4lXmufUHWTfmSmo9lBFN0J6KHUfqS1Ykcp4WbkDhFBDyto/OY7bhC/z8carItj6NZ4Au+5RcgFSadJE3QPOxT7U9CsnMXZ7Ixo//LmELhid165TtdpDaQlazLiVI2rngAd8W4GuQ9dsrapaxltyVIte+FqPwBkdOveHCTbTS3gPiBq73+wpOjyM9fHu6RQebabUUt5509kMR30RlFF3jOpEu18KhPh/wyaoxdDXOjX+h2fheszECbcSAHnHPz8aHhObMS7P/ucUhJWxmDgzbkvNTozcdnjyYWxPwCZDr9SEeAdQnBhkNPtrQkvjQ7UdGqPrHWJQNXtSi8T3SoNarq5EQSFDJAWB019ZEU3rZiuJA1+Sb5jnsCWIR5sH+gEF9AH2Xqo0ObnHhwinl/vwdI1wDXTWC987x6rLK/tXFCYEz4aghjrcQIZLoFoY1LjZkde3xUzyOKD3WYOlBRwQpTNmX7Q7enoEbD0s+0EsJK5pnJiS7IdNOI7G0MZrVmqxPR3mK+NEma8eVl66Ft3l9hRg9K6TZXhAXXVqIzQfbXrNCMBNTl3IQd/BMzsqDk=
-before_script: npm install now && $NOW rm map -y && $NOW secrets add django_secret ${DJANGO_KEY} $NOW secrets add pg_password ${PG_PASSWORD} && $NOW secrets add gmaps_key $GMAPS_KEY
+before_script: npm install now && $NOW rm map -y && $NOW secrets add django_secret ${DJANGO_KEY} && $NOW secrets add pg_password ${PG_PASSWORD} && $NOW secrets add gmaps_key $GMAPS_KEY
 script: "$NOW -e DJANGO_SECRET_KEY=@django_secret -e GMAPS_KEY=@gmaps_key -e PG_PASSWORD=@pg_password -e PG_HOST=$PG_HOST -e PG_USER=$PG_USER -e PG_DB=$PG_DB -e PG_PORT=$PG_PORT --dockerfile --public"
 after_script: "$NOW alias"
