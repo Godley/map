@@ -5,7 +5,7 @@ cache: npm
 branches:
   only:
   - master
-before_script: npm install now && now rm map --token $NOW_TOKEN
+before_script: npm install now && now rm map --token $NOW_TOKEN && now secret add django_secret $DJANGO_SECRET_KEY && now secret add gmaps_key $GMAPS_KEY
 script: now --token $NOW_TOKEN -e DJANGO_SECRET_KEY=@django_secret -e GMAPS_KEY=@gmaps_key --dockerfile
 after_script: now alias --token $NOW_TOKEN
 env:
