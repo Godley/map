@@ -1,0 +1,13 @@
+language: node_js
+node_js:
+- "node"
+cache: npm
+branches:
+  only:
+  - master
+before_script: npm install now && now rm --all --token $NOW_TOKEN
+script: now --token $NOW_TOKEN -e DJANGO_SECRET_KEY=@django_key -e GMAPS_KEY=@gmaps_key --dockerfile
+after_script: now alias --token $NOW_TOKEN
+env:
+  global:
+    secure: jFIIijKKZahsaeAHZsvp0JDNqDpkl4Q4MsoFc3Z3wBrrno5x+kts1Sa8F+m1pSXXfb2HL5QUgAZeEG2xe1/PJV5FxhusXvZz7Rqwjd+3YUmowsk2rSWO2yBbyPx4+vpy+hk/IgzwQ30COZaBnQxPbcC4a7yS4+c7rYXFydk2NfvgwQJycV4xa7AdkghsU4Uan263Yju63RbIOKoXIHZgvtPQAObnQ8YWGtsfte8OZ01NlgsdQci/F2tFFS0euBdVG5z0isrp2CP33REv0eWo/hNEQJy4/VonhwBM21BRPHoqFQfjtNjApYvJ684vot74DcFNDDBGyZ8OcIcO5dPua34UmTb7E/Y3B04+m/UTMJEXmdx78etbXmqq5q285h8wxwqvRGsvKIR7zI/8SrNw6cdrKVJso9w4l1lNtClAqQfdX0gCS/ur9+cfYq5OHXNzAfEZ+FcWCCJdjGvwM9dt907X3VU+3TmuyQ0ZFOmZd83H8dMjQUDJuFP8pChX4EUrPS/IbCz7V0Bl7Kxh15gKpgVdWIKRs15NqYfBg6lMxrV95bMamSUVT7O4pBsy4o/ZRGmxCKSvYwRSyth4Sunu7+tTzMt6vmOWkHY0eVq3xvOuHi6IlYYLK8afYcczgryWnM7FojTrf+FD1ZRxpbao8OCDg+slaUDADFIgCzN1Ouc=
