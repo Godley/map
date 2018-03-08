@@ -12,5 +12,5 @@ env:
     - secure: nwUDcQxLI2BlOZZwOXaOzTSYXNSn0kQxL2nD3Njc9IKOUFojOzx8xI7CjBFrZPfvwEMu73XGDNxyvWb0PIl3bAsB96KWxVFX7CQuM/bFsO/K982R22qpOoHqUMNS5m1ue/d1MTK4Qrnm/WpDFhvFNp0kI/4PMZbM3FSl52XCImLfB8SthlSeOZTyYWsHNusuhKj7ecMe+zmN2cxqn91gL3u+LiMD+6EVJQ4OzemC4dqOKdkAawCTmhLoWav97XGj1vEyHmmnFURIql/6TU8m09wW5rgR528UlDTJC9glh3DjmnB6mUG+voBn+N4DFM3BWsY+FfLylFK0xYrKSdFQFyu9w05WZAzDtN3S2JaFIA391fCO6xye6SAyU6p5uYbeTj2WKyrUPuM8xQ8hDAGYBfcZPRDBzFTr8bWcuYcXvbbffRl6ohxV7bBvy0DzYR4d1qUDKdat2KWArVRFDFiGynXTwCFXzqMx84fLR6JW4EUH7BGUA9WADKW8Qe7PzE4CTkz6hjd+VM0KzPVTb4VZFW8AfK17tE7SoSzvfYFMAzy5rqeIdkg3rS/JClmlNQCStOpWS8VhR6zBcDhEh5luG4PTyCl1qY1AhA/jD1UzFH8oeRcZV7ex3eJbcN73lhoJ8epQNgEZfY7IGop/gQ/72u1i+MiOLIQrnXPmJBol+Hk=  
     - NOW="now --token ${NOW_TOKEN}"
 before_script: npm install now && $NOW rm map && $NOW secrets add django_secret ${DJANGO_KEY} && $NOW secrets add gmaps_key $GMAPS_KEY
-script: $NOW -e DJANGO_SECRET_KEY=@django_secret -e GMAPS_KEY=@gmaps_key --dockerfile
+script: $NOW -e DJANGO_SECRET_KEY=@django_secret -e GMAPS_KEY=@gmaps_key --dockerfile --public
 after_script: $NOW alias
