@@ -1,14 +1,15 @@
 language: node_js
 node_js:
-- "node"
+- node
 cache: npm
 branches:
   only:
   - master
-#before_script: npm install now && now rm $(echo $(now ls --token $NOW_TOKEN | grep map)#" " | cut -d' ' -f1) -f --token $NOW_TOKEN
-before_script: npm install now && echo $(echo $(now ls --token $NOW_TOKEN | grep map)#" " | cut -d' ' -f1)
-script: now --token $NOW_TOKEN -e DJANGO_SECRET_KEY=@django_key -e GMAPS_KEY=@gmaps_key --dockerfile
+before_script: npm install now && now rm $(echo $(now ls --token $NOW_TOKEN | grep map)#" " | cut -d' ' -f1) -f --token $NOW_TOKEN || true
+script: now --token $NOW_TOKEN -e DJANGO_SECRET_KEY=$DJANGO_KEY -e GMAPS_KEY=$GMAPS_KEY --dockerfile
 after_script: now alias --token $NOW_TOKEN
 env:
   global:
-    secure: jFIIijKKZahsaeAHZsvp0JDNqDpkl4Q4MsoFc3Z3wBrrno5x+kts1Sa8F+m1pSXXfb2HL5QUgAZeEG2xe1/PJV5FxhusXvZz7Rqwjd+3YUmowsk2rSWO2yBbyPx4+vpy+hk/IgzwQ30COZaBnQxPbcC4a7yS4+c7rYXFydk2NfvgwQJycV4xa7AdkghsU4Uan263Yju63RbIOKoXIHZgvtPQAObnQ8YWGtsfte8OZ01NlgsdQci/F2tFFS0euBdVG5z0isrp2CP33REv0eWo/hNEQJy4/VonhwBM21BRPHoqFQfjtNjApYvJ684vot74DcFNDDBGyZ8OcIcO5dPua34UmTb7E/Y3B04+m/UTMJEXmdx78etbXmqq5q285h8wxwqvRGsvKIR7zI/8SrNw6cdrKVJso9w4l1lNtClAqQfdX0gCS/ur9+cfYq5OHXNzAfEZ+FcWCCJdjGvwM9dt907X3VU+3TmuyQ0ZFOmZd83H8dMjQUDJuFP8pChX4EUrPS/IbCz7V0Bl7Kxh15gKpgVdWIKRs15NqYfBg6lMxrV95bMamSUVT7O4pBsy4o/ZRGmxCKSvYwRSyth4Sunu7+tTzMt6vmOWkHY0eVq3xvOuHi6IlYYLK8afYcczgryWnM7FojTrf+FD1ZRxpbao8OCDg+slaUDADFIgCzN1Ouc=
+  - secure: jFIIijKKZahsaeAHZsvp0JDNqDpkl4Q4MsoFc3Z3wBrrno5x+kts1Sa8F+m1pSXXfb2HL5QUgAZeEG2xe1/PJV5FxhusXvZz7Rqwjd+3YUmowsk2rSWO2yBbyPx4+vpy+hk/IgzwQ30COZaBnQxPbcC4a7yS4+c7rYXFydk2NfvgwQJycV4xa7AdkghsU4Uan263Yju63RbIOKoXIHZgvtPQAObnQ8YWGtsfte8OZ01NlgsdQci/F2tFFS0euBdVG5z0isrp2CP33REv0eWo/hNEQJy4/VonhwBM21BRPHoqFQfjtNjApYvJ684vot74DcFNDDBGyZ8OcIcO5dPua34UmTb7E/Y3B04+m/UTMJEXmdx78etbXmqq5q285h8wxwqvRGsvKIR7zI/8SrNw6cdrKVJso9w4l1lNtClAqQfdX0gCS/ur9+cfYq5OHXNzAfEZ+FcWCCJdjGvwM9dt907X3VU+3TmuyQ0ZFOmZd83H8dMjQUDJuFP8pChX4EUrPS/IbCz7V0Bl7Kxh15gKpgVdWIKRs15NqYfBg6lMxrV95bMamSUVT7O4pBsy4o/ZRGmxCKSvYwRSyth4Sunu7+tTzMt6vmOWkHY0eVq3xvOuHi6IlYYLK8afYcczgryWnM7FojTrf+FD1ZRxpbao8OCDg+slaUDADFIgCzN1Ouc=
+  - secure: QYQyEfB4NTo8e5hu60NrdiRqpq6wieiygM23CggBp+49frpqjznpD+oe1bWqry3g5pr/a6eS/XRTfuQF/RkECNHr5CpeakELGs1nelgSq63NnH7BqLOmIfP/p56wT9Cry8Y3qpi+N3Ekv1gpIwZK+W3wIRls9T+PPwuytpDKOZ/6X+bcBrosxfocqSuHXzREPY+B8RwBKx3EukYYVvyivOj/WKplGFuozvPTpwQ0/8/WpVSvpZ5IMtNx7dACyyPPHZBM0xzbjX5m7SSCvyHm1BwLOFaHGLxEwrYVEds0bB2G8c65OCnL0u+HXg9pLbp8CX9rqOKC4oj/pppa/srfdaOtu6DiykU4yIPRUGyc9QTmg0w4Ma8lFI4P+IuG/yPZ3h04ApNOmz0uy+D3bOOX3PbWxoo9AQf7riWAqo0JppNYDKrc0b7TQzqFgHG82F53sG0ukbDi/5DunhfF0bsZY7jzlPBowpnrvX6+nyn06rjeKwKud4n5DcZDf0McmEsQzSyaPk6knwKGVdIAK74OTpKoH3lmVUIg/XErQWUgxWvWyxl1kqCIYsOTnWuY+hD7Od991x/0K2if1QrF08AtEkK6685+QGDmOTF9eXsuFpAf2Jhgv9s1x78atG1FIx8m9WoqgrBImMkWTxbB8whBF/2EyRkYjivQdY3g7ICGbp0=
+  - secure: nwUDcQxLI2BlOZZwOXaOzTSYXNSn0kQxL2nD3Njc9IKOUFojOzx8xI7CjBFrZPfvwEMu73XGDNxyvWb0PIl3bAsB96KWxVFX7CQuM/bFsO/K982R22qpOoHqUMNS5m1ue/d1MTK4Qrnm/WpDFhvFNp0kI/4PMZbM3FSl52XCImLfB8SthlSeOZTyYWsHNusuhKj7ecMe+zmN2cxqn91gL3u+LiMD+6EVJQ4OzemC4dqOKdkAawCTmhLoWav97XGj1vEyHmmnFURIql/6TU8m09wW5rgR528UlDTJC9glh3DjmnB6mUG+voBn+N4DFM3BWsY+FfLylFK0xYrKSdFQFyu9w05WZAzDtN3S2JaFIA391fCO6xye6SAyU6p5uYbeTj2WKyrUPuM8xQ8hDAGYBfcZPRDBzFTr8bWcuYcXvbbffRl6ohxV7bBvy0DzYR4d1qUDKdat2KWArVRFDFiGynXTwCFXzqMx84fLR6JW4EUH7BGUA9WADKW8Qe7PzE4CTkz6hjd+VM0KzPVTb4VZFW8AfK17tE7SoSzvfYFMAzy5rqeIdkg3rS/JClmlNQCStOpWS8VhR6zBcDhEh5luG4PTyCl1qY1AhA/jD1UzFH8oeRcZV7ex3eJbcN73lhoJ8epQNgEZfY7IGop/gQ/72u1i+MiOLIQrnXPmJBol+Hk=
