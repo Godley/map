@@ -1,12 +1,13 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
-import { CookiesProvider, withCookies, Cookies } from 'react-cookie';
 import ReactMapboxGl, { Layer, Feature, Popup } from "react-mapbox-gl";
+import { CookiesProvider, withCookies, Cookies } from 'react-cookie';
+import { instanceOf } from 'prop-types';
 
 class App extends Component {
-    static propTypes = {
-    cookies: React.PropTypes.instanceOf(Cookies).isRequired
+  static propTypes = {
+    cookies: instanceOf(Cookies).isRequired
   };
   constructor() {
     super();
@@ -20,27 +21,35 @@ class App extends Component {
     this.onFeatureClick = this.onFeatureClick.bind(this);
   }
   async componentDidMount() {
+    const { cookies } = this.props;
     var options = {
     method: 'GET',
     credentials: 'include',
     headers: {
-      "X-CSRFToken": this.props.cookies.get('csrftoken'),
       Accept: 'application/json',
       'Content-Type': 'application/json'
       }
     };
-//    let result = await fetch("/api/v1/transport/?format=json", options);
-//    let hotels = await result.json();
-//    let result = await fetch("/api/v1/hotel/?format=json", options);
-//    let hotels = await result.json();
-    let result = await fetch("/api/journeys/?format=json", options);
-    let journeys = await result.json();
-//    let result = await fetch("/api/v1/activity/?format=json", options);
-//    let activities = result.json();
-    this.setState({//"hotels": hotels.objects,
-        "journeys": result.objects
-        //"activities": result.objects
-        });
+    try {
+      let result = await fetch("/api/journeys/?format=json", options);
+      let journeys = await result.json();
+      // result = await fetch("/api/hotels/?format=json", options);
+      // let hotels = await result.json();
+      // result = await fetch("/api/activities/?format=json", options);
+      // let activities = await result.json();
+      this.setState({
+        "journeys": journeys,
+        // "hotels": hotels.objects,
+        // "activities": activities.objects
+      });
+    }
+    catch (exception) {
+      // let result = await fetch("/api/guestjourney/?format=json", options);
+      // let journeys = await result.json();
+      // this.setState({
+      //   "journeys": journeys.objects
+      // });
+    }
   }
 
   onFeatureClick(args) {
@@ -48,6 +57,7 @@ class App extends Component {
     this.setState({"popup": {"coords": args.lngLat,
   "key": args.feature.layer.id}});
   }
+
   render() {
     let start_endpoints = [];
     let hotels = [];
@@ -55,18 +65,18 @@ class App extends Component {
     let trains = [];
     let activities = [];
     let popup;
-//    for(let i=0; i<this.state.hotels.length; i++) {
-//      const coords = this.state.hotels[i].position.split(",").map(Number).reverse();
-//      const id = "hotels-"+i;
-//      hotels.push(<Layer id={id} type="symbol"
-//      layout={{ "icon-image": "lodging-15" }}><Feature key={i} coordinates={coords} onClick={this.onFeatureClick} /></Layer>);
-//    }
-//    for(let i=0; i<this.state.activities.length; i++) {
-//      const coords = this.state.activities[i].position.split(",").map(Number).reverse();
-//      const id = "activities-"+i;
-//      activities.push(<Layer id={id} type="symbol"
-//      layout={{ "icon-image": "marker-15" }}><Feature key={i} coordinates={coords}  onClick={this.onFeatureClick} /></Layer>);
-//    }
+    for(let i=0; i<this.state.hotels.length; i++) {
+      const coords = this.state.hotels[i].position.split(",").map(Number).reverse();
+      const id = "hotels-"+i;
+      hotels.push(<Layer id={id} type="symbol"
+      layout={{ "icon-image": "lodging-15" }}><Feature key={i} coordinates={coords} onClick={this.onFeatureClick} /></Layer>);
+    }
+    for(let i=0; i<this.state.activities.length; i++) {
+      const coords = this.state.activities[i].position.split(",").map(Number).reverse();
+      const id = "activities-"+i;
+      activities.push(<Layer id={id} type="symbol"
+      layout={{ "icon-image": "marker-15" }}><Feature key={i} coordinates={coords}  onClick={this.onFeatureClick} /></Layer>);
+    }
     for(let i=0; i<this.state.journeys.length; i++) {
       const elem = this.state.journeys[i];
       const startpoint = elem.start.position.split(",").map(Number).reverse();
@@ -79,7 +89,7 @@ class App extends Component {
         lineoffset = 6;
       }
       const id = "journeys-"+i;
-      planes.push(<Layer id={id} type="line" paint={{ "line-color": elem.method.color, "line-width": 4,
+      planes.push(<Layer id={id} type="line" paint={{ "line-color": "#"+elem.method.color, "line-width": 4,
       "line-offset": lineoffset }}>
                     <Feature coordinates={coords} onClick={this.onFeatureClick} />
                   </Layer>);
