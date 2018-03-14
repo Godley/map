@@ -87,7 +87,6 @@ DATABASES = {
     'default': dj_database_url.config(conn_max_age=600, ssl_require=True)
 }
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
 
@@ -109,5 +108,5 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'build', 'static'),
 )
-import django
-django.setup()
+# import django
+# django.setup()
