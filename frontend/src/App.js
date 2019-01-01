@@ -4,6 +4,9 @@ import './App.css';
 import ReactMapboxGl, { Layer, Feature, Popup } from "react-mapbox-gl";
 import { CookiesProvider, withCookies, Cookies } from 'react-cookie';
 import { instanceOf } from 'prop-types';
+import Dotenv from 'dotenv';
+
+Dotenv.config();
 
 class App extends Component {
   static propTypes = {
@@ -129,7 +132,7 @@ class App extends Component {
     return (
       <ReactMapboxGl
   style="mapbox://styles/mapbox/streets-v8"
-  accessToken="pk.eyJ1IjoiY2hhcndhcnoiLCJhIjoiY2ltNnU1c3g3MDAwNHdhbTlyN3J0a3gzayJ9.CdOg19NClAJoDH-jzpw57A"
+  accessToken={process.env.REACT_APP_MAPBOX_API_KEY}
   containerStyle={{
     height: "100vh",
     width: "100vw"
