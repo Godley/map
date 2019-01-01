@@ -3,7 +3,7 @@ COPY . /app
 WORKDIR /app
 EXPOSE 80
 ARG MAPBOX_API_KEY
-RUN echo REACT_APP_MAPBOX_API_KEY=$MAPBOX_API_KEY > frontend/src/.env
+RUN echo REACT_APP_MAPBOX_API_KEY=$MAPBOX_API_KEY > frontend/.env
 RUN apk add --no-cache --update nodejs nodejs-npm git python3-dev gcc musl-dev postgresql-dev && \
     cd frontend && npm install && \
     npm run build && \
