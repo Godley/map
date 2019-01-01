@@ -13,5 +13,5 @@ ENV DJANGO_SU_EMAIL=me@charlottegodley.co.uk
 ARG DJANGO_SU_PASSWORD
 ARG DJANGO_SECRET_KEY
 ARG DATABASE_URL
-RUN cd backend && python manage.py migrate && djcli ls settings.AUTH_USER_MODEL is_staff=1 username email is_superuser || djcli save settings.AUTH_USER_MODEL email=$DJANGO_SU_EMAIL username=$DJANGO_SU_NAME is_superuser=True is_staff=True first_name=Charlotte password=$DJANGO_SU_PASSWORD
+RUN cd backend && python manage.py migrate && mkdir -p ../build && mkdir -p ../build/static && python manage.py collectstatic --noinput
 CMD python backend/manage.py runserver 0.0.0.0:80

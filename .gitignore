@@ -90,3 +90,4 @@ ENV/
 .idea/
 build/
 frontend/node_modules/
+credentials.env

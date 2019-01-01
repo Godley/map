@@ -2,14 +2,14 @@
     "alias": "godleymap.now.sh",
     "build": {
        "env": {
-        "DJANGO_SECRET_KEY": "@django_key",
+        "DJANGO_SECRET_KEY": "@django_secret",
         "DJANGO_SU_PASSWORD": "@django-password",
         "DATABASE_URL": "@db-url"
        }
     },
     "env": {
         "DATABASE_URL": "@db-url",
-        "DJANGO_SECRET_KEY": "@django_key",
+        "DJANGO_SECRET_KEY": "@django_secret",
         "GMAPS_KEY": "@gmaps_key",
         "DJANGO_SU_PASSWORD": "@django-password"
     }
