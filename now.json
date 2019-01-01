@@ -1,17 +1,23 @@
 {
-    "alias": "godleymap.now.sh",
-    "build": {
-       "env": {
-        "DJANGO_SECRET_KEY": "@django_secret",
-        "DJANGO_SU_PASSWORD": "@django-password",
-        "DATABASE_URL": "@db-url",
-         "MAPBOX_API_KEY": "@mapbox-key"
-       }
-    },
-    "env": {
-        "DATABASE_URL": "@db-url",
-        "DJANGO_SECRET_KEY": "@django_secret",
-        "GMAPS_KEY": "@gmaps_key",
-        "DJANGO_SU_PASSWORD": "@django-password"
+  "alias": "godleymap.now.sh",
+  "build": {
+     "env": {
+      "DJANGO_SECRET_KEY": "@django_secret",
+      "DJANGO_SU_PASSWORD": "@django-password",
+      "DATABASE_URL": "@db-url",
+       "MAPBOX_API_KEY": "@mapbox-key"
+     }
+  },
+  "env": {
+      "DATABASE_URL": "@db-url",
+      "DJANGO_SECRET_KEY": "@django_secret",
+      "GMAPS_KEY": "@gmaps_key",
+      "DJANGO_SU_PASSWORD": "@django-password"
+  },
+  "scale": {
+    "bru1": {
+      "min": 1,
+      "max": 1
     }
+  }
 }
