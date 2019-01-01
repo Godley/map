@@ -86,7 +86,7 @@ WSGI_APPLICATION = 'MapAPI.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 DATABASES = {
-    'default': dj_database_url.config(conn_max_age=600, ssl_require=True)
+    'default': dj_database_url.config(conn_max_age=0, ssl_require=True)
 }
 
 # Internationalization
