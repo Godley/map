@@ -22,9 +22,11 @@ class App extends Component {
     this.state = {
       center: [139.767023,35.669256],
       zoom: [5],
-      "hotels": [],
+      data: {
+        "hotels": [],
       "journeys": [],
       "activities": [],
+      },
       "selected": "",
     }
     this.onFeatureClick = this.onFeatureClick.bind(this);
@@ -66,8 +68,20 @@ class App extends Component {
           } 
         
       }
+      let stays = await fetch("/api/stays/?format=json", options);
+      stays = await stays.json();
+      for(let i=0; i<stays.length; i++) {
+        let geocoded = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${elem.location}.json?access_token=${process.env.REACT_APP_MAPBOX_API_KEY}`)
+        let geocoded = geocoded.json();
+        stays[i].coords = geocoded.features[0].geometry.coordinates
+      }
+      
+      
       this.setState({
-        "journeys": journeys,
+        "data": {
+          "journeys": journeys,
+        "stays": stays,
+        }
         // "hotels": hotels.objects,
         // "activities": activities.objects
       });
@@ -101,7 +115,7 @@ class App extends Component {
         return null
     }
     for(let i=0; i<this.state.journeys.length; i++) {
-      const elem = this.state.journeys[i];
+      const elem = this.state.data["journeys"][i];
       const id = "journeys-"+i;
       let color = "#"+elem.method.color;
       let lineWidth = 4;
@@ -115,25 +129,28 @@ class App extends Component {
       start_endpoints.push(elem.start.name);
       start_endpoints.push(elem.end.name);
     }
+    for(let i=0; i<this.state.stays.length; i++) {
+      const id = "hotels-"+i;
+      hotels.push(<Layer id={id} type="marker" layout={{ "icon-image": "lodging-15" }}>
+      <Feature coordinates={this.state.data["hotels"][i]} onClick={this.onFeatureClick} />
+    </Layer>)
+    }
     if(this.state.popup) {
       let indexor = this.state.popup.key.split("-");
-      let data = this.state.journeys[indexor[1]];
-      console.log(data);
+      let data = this.state.data[indexor[0]][indexor[1]];
       let name = data.name;
       if(!name) {
         name = data.start + " to " + data.end;
       }
       let rows = [];
       let route_info = JSON.parse(data.route_info)
+      rows.push(<tr><td>Date</td><td>{data.datetime}</td></tr>)
       for(let field in route_info) {
-        rows.push(<tr><td>{field}</td><td>{route_info[field]}</td></tr>)
+        rows.push(<tr><td><b>{field}</b></td><td>{route_info[field]}</td></tr>)
       }
         
       popup = <Popup
                 coordinates={this.state.popup.coords}
-                offset={{
-                  'bottom-left': [12, -38],  'bottom': [0, -38], 'bottom-right': [-12, -38]
-                }}
                 anchor="bottom-right">
                 <h2>{name}</h2>
                 <table>
