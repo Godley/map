@@ -1,13 +1,5 @@
 from django.db import models
-from geoposition.fields import GeopositionField
 
-# Create your models here.
-class Location(models.Model):
-    name = models.CharField(max_length=100)
-    position = GeopositionField()
-
-    def __str__(self):
-        return self.name
 
 class Transport(models.Model):
     name = models.CharField(max_length=20)
@@ -17,26 +9,25 @@ class Transport(models.Model):
         return "{} (#{})".format(self.name, self.color)
 
 class Journey(models.Model):
-    start = models.ForeignKey(Location, related_name="start")
-    end = models.ForeignKey(Location)
+    start = models.CharField(max_length=50, default="")
+    end = models.CharField(max_length=50, default="")
     datetime = models.DateTimeField()
-    duration = models.DurationField()
-    route_id = models.CharField(max_length=40, default="")
-    route_name = models.CharField(default="", max_length=40)
+    route_info = models.CharField(max_length=200, default="{}")
     method = models.ForeignKey(Transport)
-    price = models.FloatField(blank=True, null=True)
 
     def __str__(self):
         return "{} to {}".format(self.start, self.end)
 
 
-class Stay(Location):
+class Stay(models.Model):
+    location = models.CharField(max_length=50, default="")
     datetime = models.DateTimeField()
     duration = models.DurationField()
     link = models.URLField(default="https://airbnb.co.uk")
 
 
-class Activity(Location):
+class Activity(models.Model):
+    location = models.CharField(max_length=50, default="")
     link = models.URLField()
     cost = models.FloatField()
     datetime = models.DateField()

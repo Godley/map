@@ -36,10 +36,26 @@ class App extends Component {
     try {
       let result = await fetch("/api/journeys/?format=json", options);
       let journeys = await result.json();
-      // result = await fetch("/api/hotels/?format=json", options);
-      // let hotels = await result.json();
-      // result = await fetch("/api/activities/?format=json", options);
-      // let activities = await result.json();
+      for(let i=0; i<journeys; i++) {
+        let start_encoded = journeys[i].start.replace(" ", "_")
+        let end_encoded = journeys[i].end.replace(" ", "_")
+        let geocode_start = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${start_encoded}.json?access_token=${process.env.REACT_APP_MAPBOX_API_KEY}`)
+        let geocode_end = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${end_encoded}.json?access_token=${process.env.REACT_APP_MAPBOX_API_KEY}`)
+        journeys[i].start_encoded = geocode_start.features[0].coordinates
+        journeys[i].end_encoded = geocode_end.features[0].coordinates
+        journeys[i].coords = journeys[i].start_encoded.reverse() + journeys[i].end_encoded.reverse()
+        
+        if(journeys[i].method.name != 'plane' && geocode_start.features.length > 0 && geocode_end.features.length > 0) {
+            let start = geocode_start.features[0].coordinates.join(",")
+            let end = geocode_end.features[0].coordinates.join(",")
+            let full_coords = `${start};${end}`
+            let direction_line = await fetch(`https://api.mapbox.com/matching/v5/mapbox/driving/${full_coords}?approaches=curb&geometries=geojson&profile=mapbox/driving&access_token=${process.env.REACT_APP_MAPBOX_API_KEY}`)
+            if(direction_line.matchings.length > 0) {
+              journeys[i].coords = direction_line.matchings[0].geometry.coordinates
+            }
+          } 
+        
+      }
       this.setState({
         "journeys": journeys,
         // "hotels": hotels.objects,
@@ -82,19 +98,11 @@ class App extends Component {
     }
     for(let i=0; i<this.state.journeys.length; i++) {
       const elem = this.state.journeys[i];
-      const startpoint = elem.start.position.split(",").map(Number).reverse();
-      const endpoint = elem.end.position.split(",").map(Number).reverse();
-      const coords = [startpoint, endpoint];
       let lineoffset = 0;
-      if(start_endpoints.indexOf(elem.start.name) > -1 && start_endpoints.indexOf(elem.end.name) > -1
-      && elem.method.name == "plane")
-      {
-        lineoffset = 6;
-      }
       const id = "journeys-"+i;
       planes.push(<Layer id={id} type="line" paint={{ "line-color": "#"+elem.method.color, "line-width": 4,
       "line-offset": lineoffset }}>
-                    <Feature coordinates={coords} onClick={this.onFeatureClick} />
+                    <Feature coordinates={elem.coords} onClick={this.onFeatureClick} />
                   </Layer>);
       start_endpoints.push(elem.start.name);
       start_endpoints.push(elem.end.name);
@@ -140,8 +148,6 @@ class App extends Component {
   center={this.state.center}
   zoom={this.state.zoom}>
   {popup}
-    {hotels}
-      {activities}
     {planes}
     {trains}
 </ReactMapboxGl>

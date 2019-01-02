@@ -1,12 +1,7 @@
-from map.models import Journey, Stay, Activity, Location, Transport
+from map.models import Journey, Transport
 from django.conf.urls import url, include
 from django.contrib.auth.models import User
 from rest_framework import routers, serializers, viewsets
-
-class LocationSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = Location
-        fields = ('name', 'position')
 
 class TransportSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
@@ -15,13 +10,11 @@ class TransportSerializer(serializers.HyperlinkedModelSerializer):
 
 # Serializers define the API representation.
 class JourneySerializer(serializers.HyperlinkedModelSerializer):
-    start = LocationSerializer(read_only=True)
-    end = LocationSerializer(read_only=True)
     method = TransportSerializer()
 
     class Meta:
         model = Journey
-        fields = ('start', 'end', 'datetime', 'duration', 'route_id', 'route_name', 'price', 'method')
+        fields = ('start', 'end', 'datetime', 'method', 'route_info')
 
 # ViewSets define the view behavior.
 class JourneyViewSet(viewsets.ModelViewSet):
