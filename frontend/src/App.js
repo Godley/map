@@ -54,7 +54,7 @@ class App extends Component {
             let start = journeys[i].start_geocode.join(",")
             let end = journeys[i].end_geocode.join(",")
             let full_coords = `${start};${end}`
-            let direction_line = await fetch(`https://api.mapbox.com/driving/v5/mapbox/driving/${full_coords}?approaches=curb;curb&geometries=geojson&access_token=${process.env.REACT_APP_MAPBOX_API_KEY}`)
+            let direction_line = await fetch(`https://api.mapbox.com/directions/v5/mapbox/driving/${full_coords}?approaches=curb;curb&geometries=geojson&access_token=${process.env.REACT_APP_MAPBOX_API_KEY}`)
             if(direction_line.matchings.length > 0) {
               journeys[i].coords = direction_line.matchings[0].geometry.coordinates
             }
