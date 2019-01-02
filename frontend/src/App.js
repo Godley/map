@@ -47,16 +47,21 @@ class App extends Component {
         console.log(geocode_end)
         journeys[i].start_geocode = geocode_start.features[0].geometry.coordinates
         journeys[i].end_geocode = geocode_end.features[0].geometry.coordinates
-        journeys[i].coords = journeys[i].start_geocode.reverse() + journeys[i].end_geocode.reverse()
+        journeys[i].coords = []
+        journeys[i].coords.push(journeys[i].start_geocode)
+        journeys[i].coords.push(journeys[i].end_geocode)
         console.log(journeys[i].start_geocode)
         console.log(journeys[i].end_geocode)
         if(journeys[i].method.name !== 'plane' && geocode_start.features.length > 0 && geocode_end.features.length > 0) {
             let start = journeys[i].start_geocode.join(",")
             let end = journeys[i].end_geocode.join(",")
             let full_coords = `${start};${end}`
-            let direction_line = await fetch(`https://api.mapbox.com/directions/v5/mapbox/driving/${full_coords}?approaches=curb;curb&geometries=geojson&access_token=${process.env.REACT_APP_MAPBOX_API_KEY}`)
+            let direction_line = await fetch(`https://api.mapbox.com/directions/v5/mapbox/driving/${full_coords}?approaches=curb;curb&geometries=geojson&steps=true&access_token=${process.env.REACT_APP_MAPBOX_API_KEY}`)
+            direction_line = await direction_line.json();
+            console.log(direction_line)
             if(direction_line.routes.length > 0) {
               journeys[i].coords = direction_line.routes[0].geometry.coordinates
+              console.log(journeys[i].coords)
             }
           } 
         
@@ -99,8 +104,7 @@ class App extends Component {
       let lineoffset = 0;
       console.log(elem)
       const id = "journeys-"+i;
-     planes.push(<Layer id={id} type="line" paint={{ "line-color": "#"+elem.method.color, "line-width": 4,
-     "line-offset": lineoffset }}>
+     planes.push(<Layer id={id} type="line" paint={{ "line-color": "#"+elem.method.color, "line-width": 4 }}>
                    <Feature coordinates={elem.coords} onClick={this.onFeatureClick} />
                  </Layer>);
       start_endpoints.push(elem.start.name);
@@ -146,9 +150,7 @@ class App extends Component {
   }}
   center={this.state.center}
   zoom={this.state.zoom}>
-  {popup}
-    {planes}
-    {trains}
+  {planes}
 </ReactMapboxGl>
     );
   }
