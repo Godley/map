@@ -42,7 +42,7 @@ INSTALLED_APPS = (
     'map',
     'geoposition',
     'corsheaders',
-    'rest_framework',
+    'rest_framework'
 )
 CORS_ORIGIN_WHITELIST = (
     'localhost:3000'

@@ -36,18 +36,23 @@ class App extends Component {
     try {
       let result = await fetch("/api/journeys/?format=json", options);
       let journeys = await result.json();
-      for(let i=0; i<journeys; i++) {
+      for(let i=0; i<journeys.length; i++) {
         let start_encoded = journeys[i].start.replace(" ", "_")
         let end_encoded = journeys[i].end.replace(" ", "_")
         let geocode_start = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${start_encoded}.json?access_token=${process.env.REACT_APP_MAPBOX_API_KEY}`)
         let geocode_end = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${end_encoded}.json?access_token=${process.env.REACT_APP_MAPBOX_API_KEY}`)
-        journeys[i].start_encoded = geocode_start.features[0].coordinates
-        journeys[i].end_encoded = geocode_end.features[0].coordinates
-        journeys[i].coords = journeys[i].start_encoded.reverse() + journeys[i].end_encoded.reverse()
-        
-        if(journeys[i].method.name != 'plane' && geocode_start.features.length > 0 && geocode_end.features.length > 0) {
-            let start = geocode_start.features[0].coordinates.join(",")
-            let end = geocode_end.features[0].coordinates.join(",")
+        geocode_start = await geocode_start.json();
+        geocode_end = await geocode_end.json();
+        console.log(geocode_start)
+        console.log(geocode_end)
+        journeys[i].start_geocode = geocode_start.features[0].geometry.coordinates
+        journeys[i].end_geocode = geocode_end.features[0].geometry.coordinates
+        journeys[i].coords = journeys[i].start_geocode.reverse() + journeys[i].end_geocode.reverse()
+        console.log(journeys[i].start_geocode)
+        console.log(journeys[i].end_geocode)
+        if(journeys[i].method.name !== 'plane' && geocode_start.features.length > 0 && geocode_end.features.length > 0) {
+            let start = journeys[i].start_geocode.join(",")
+            let end = journeys[i].end_geocode.join(",")
             let full_coords = `${start};${end}`
             let direction_line = await fetch(`https://api.mapbox.com/matching/v5/mapbox/driving/${full_coords}?approaches=curb&geometries=geojson&profile=mapbox/driving&access_token=${process.env.REACT_APP_MAPBOX_API_KEY}`)
             if(direction_line.matchings.length > 0) {
@@ -63,6 +68,7 @@ class App extends Component {
       });
     }
     catch (exception) {
+      console.log(exception)
       // let result = await fetch("/api/guestjourney/?format=json", options);
       // let journeys = await result.json();
       // this.setState({
@@ -84,26 +90,19 @@ class App extends Component {
     let trains = [];
     let activities = [];
     let popup;
-    for(let i=0; i<this.state.hotels.length; i++) {
-      const coords = this.state.hotels[i].position.split(",").map(Number).reverse();
-      const id = "hotels-"+i;
-      hotels.push(<Layer id={id} type="symbol"
-      layout={{ "icon-image": "lodging-15" }}><Feature key={i} coordinates={coords} onClick={this.onFeatureClick} /></Layer>);
-    }
-    for(let i=0; i<this.state.activities.length; i++) {
-      const coords = this.state.activities[i].position.split(",").map(Number).reverse();
-      const id = "activities-"+i;
-      activities.push(<Layer id={id} type="symbol"
-      layout={{ "icon-image": "marker-15" }}><Feature key={i} coordinates={coords}  onClick={this.onFeatureClick} /></Layer>);
+
+    if (!this.state.journeys) {
+        return null
     }
     for(let i=0; i<this.state.journeys.length; i++) {
       const elem = this.state.journeys[i];
       let lineoffset = 0;
+      console.log(elem)
       const id = "journeys-"+i;
-      planes.push(<Layer id={id} type="line" paint={{ "line-color": "#"+elem.method.color, "line-width": 4,
-      "line-offset": lineoffset }}>
-                    <Feature coordinates={elem.coords} onClick={this.onFeatureClick} />
-                  </Layer>);
+     planes.push(<Layer id={id} type="line" paint={{ "line-color": "#"+elem.method.color, "line-width": 4,
+     "line-offset": lineoffset }}>
+                   <Feature coordinates={elem.coords} onClick={this.onFeatureClick} />
+                 </Layer>);
       start_endpoints.push(elem.start.name);
       start_endpoints.push(elem.end.name);
     }
