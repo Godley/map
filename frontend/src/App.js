@@ -8,6 +8,11 @@ import Dotenv from 'dotenv';
 
 Dotenv.config();
 
+function shadeColor2(color, percent) {   
+  var f=parseInt(color.slice(1),16),t=percent<0?0:255,p=percent<0?percent*-1:percent,R=f>>16,G=f>>8&0x00FF,B=f&0x0000FF;
+  return "#"+(0x1000000+(Math.round((t-R)*p)+R)*0x10000+(Math.round((t-G)*p)+G)*0x100+(Math.round((t-B)*p)+B)).toString(16).slice(1);
+}
+
 class App extends Component {
   static propTypes = {
     cookies: instanceOf(Cookies).isRequired
@@ -19,7 +24,8 @@ class App extends Component {
       zoom: [5],
       "hotels": [],
       "journeys": [],
-      "activities": []
+      "activities": [],
+      "selected": "",
     }
     this.onFeatureClick = this.onFeatureClick.bind(this);
   }
@@ -43,25 +49,19 @@ class App extends Component {
         let geocode_end = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${end_encoded}.json?access_token=${process.env.REACT_APP_MAPBOX_API_KEY}`)
         geocode_start = await geocode_start.json();
         geocode_end = await geocode_end.json();
-        console.log(geocode_start)
-        console.log(geocode_end)
         journeys[i].start_geocode = geocode_start.features[0].geometry.coordinates
         journeys[i].end_geocode = geocode_end.features[0].geometry.coordinates
         journeys[i].coords = []
         journeys[i].coords.push(journeys[i].start_geocode)
         journeys[i].coords.push(journeys[i].end_geocode)
-        console.log(journeys[i].start_geocode)
-        console.log(journeys[i].end_geocode)
         if(journeys[i].method.name !== 'plane' && geocode_start.features.length > 0 && geocode_end.features.length > 0) {
             let start = journeys[i].start_geocode.join(",")
             let end = journeys[i].end_geocode.join(",")
             let full_coords = `${start};${end}`
             let direction_line = await fetch(`https://api.mapbox.com/directions/v5/mapbox/driving/${full_coords}?approaches=curb;curb&geometries=geojson&steps=true&access_token=${process.env.REACT_APP_MAPBOX_API_KEY}`)
             direction_line = await direction_line.json();
-            console.log(direction_line)
             if(direction_line.routes.length > 0) {
               journeys[i].coords = direction_line.routes[0].geometry.coordinates
-              console.log(journeys[i].coords)
             }
           } 
         
@@ -83,9 +83,10 @@ class App extends Component {
   }
 
   onFeatureClick(args) {
-    console.log(args.feature.layer.id);
+    console.log(args)
     this.setState({"popup": {"coords": args.lngLat,
-  "key": args.feature.layer.id}});
+  "key": args.feature.layer.id},
+  "selected": args.feature.layer.id});
   }
 
   render() {
@@ -101,10 +102,14 @@ class App extends Component {
     }
     for(let i=0; i<this.state.journeys.length; i++) {
       const elem = this.state.journeys[i];
-      let lineoffset = 0;
-      console.log(elem)
       const id = "journeys-"+i;
-     planes.push(<Layer id={id} type="line" paint={{ "line-color": "#"+elem.method.color, "line-width": 4 }}>
+      let color = "#"+elem.method.color;
+      let lineWidth = 2;
+      if(this.state.selected != "" && this.state.selected != id) {
+        lineWidth = 4;
+        color = shadeColor2(color, -0.4);
+      }
+     planes.push(<Layer id={id} type="line" paint={{ "line-color": color, "line-width": lineWidth}}>
                    <Feature coordinates={elem.coords} onClick={this.onFeatureClick} />
                  </Layer>);
       start_endpoints.push(elem.start.name);
@@ -112,33 +117,31 @@ class App extends Component {
     }
     if(this.state.popup) {
       let indexor = this.state.popup.key.split("-");
-      let data = this.state[indexor[0]][Number(indexor[1])];
+      let data = this.state.journeys[indexor[1]];
       console.log(data);
       let name = data.name;
       if(!name) {
-        name = data.start.name + " to " + data.end.name;
+        name = data.start + " to " + data.end;
       }
       let rows = [];
-      const excluded = ["start", "end", "resource_uri", "id"];
-      for(const field in data) {
-        console.log(data);
-        if(excluded.indexOf(field) == -1) {
-        rows.push(<tr><td>{field}</td><td>{data[field]}</td></tr>);
-        }
+      let route_info = JSON.parse(data.route_info)
+      for(let field in route_info) {
+        rows.push(<tr><td>{field}</td><td>{route_info[field]}</td></tr>)
       }
+        
       popup = <Popup
-  coordinates={this.state.popup.coords}
-  offset={{
-    'bottom-left': [12, -38],  'bottom': [0, -38], 'bottom-right': [-12, -38]
-  }}
-  anchor="bottom-right">
-  <h2>{name}</h2>
-  <table>
-    <tbody>
-      {rows}
-    </tbody>
-  </table>
-</Popup>;
+                coordinates={this.state.popup.coords}
+                offset={{
+                  'bottom-left': [12, -38],  'bottom': [0, -38], 'bottom-right': [-12, -38]
+                }}
+                anchor="bottom-right">
+                <h2>{name}</h2>
+                <table>
+                  <tbody>
+                    {rows}
+                  </tbody>
+                </table>
+              </Popup>;
     }
     return (
       <ReactMapboxGl
@@ -150,6 +153,7 @@ class App extends Component {
   }}
   center={this.state.center}
   zoom={this.state.zoom}>
+  {this.state.popup? popup : null}
   {planes}
 </ReactMapboxGl>
     );
