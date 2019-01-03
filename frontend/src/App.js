@@ -27,9 +27,10 @@ class App extends Component {
       "journeys": [],
       "activities": [],
       },
-      "selected": "",
+      "selected": null,
     }
     this.onFeatureClick = this.onFeatureClick.bind(this);
+    this.onMouseLeave = this.onMouseLeave.bind(this);
   }
   async componentDidMount() {
     const { cookies } = this.props;
@@ -91,10 +92,14 @@ class App extends Component {
   }
 
   onFeatureClick(args) {
-    console.log(args)
     this.setState({"popup": {"coords": args.lngLat,
   "key": args.feature.layer.id},
   "selected": args.feature.layer.id});
+  }
+
+  onMouseLeave(args) {
+    this.setState({"popup": {},
+  "selected": null})
   }
 
   render() {
@@ -122,11 +127,12 @@ class App extends Component {
     }
     for(let i=0; i<this.state.data["stays"].length; i++) {
       const id = "stays-"+i;
+      console.log(this.state.data["stays"][i].lng,this.state.data["stays"][i].lat)
       hotels.push(<Layer id={id} type="marker" layout={{ "icon-image": "lodging-15" }}>
-      <Feature coordinates={[this.state.data["stays"][i].lng,this.state.data["stays"][i].lat]} onClick={this.onFeatureClick} />
+      <Feature coordinates={[this.state.data["stays"][i].lng,this.state.data["stays"][i].lat]} onMouseLeave={this.onMouseLeave} onClick={this.onFeatureClick} />
     </Layer>)
     }
-    if(this.state.popup) {
+    if(this.state.selected) {
       let indexor = this.state.popup.key.split("-");
       let data = this.state.data[indexor[0]][indexor[1]];
       let name = data.name;
@@ -161,7 +167,7 @@ class App extends Component {
   }}
   center={this.state.center}
   zoom={this.state.zoom}>
-  {this.state.popup? popup : null}
+  {this.state.selected? popup : null}
   {planes}
 </ReactMapboxGl>
     );
