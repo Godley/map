@@ -105,9 +105,6 @@ class App extends Component {
     let activities = [];
     let popup;
 
-    if (!this.state.journeys) {
-        return null
-    }
     for(let i=0; i<this.state.data["journeys"].length; i++) {
       const elem = this.state.data["journeys"][i];
       const id = "journeys-"+i;
