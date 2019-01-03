@@ -70,17 +70,11 @@ class App extends Component {
       }
       let stays = await fetch("/api/stays/?format=json", options);
       stays = await stays.json();
-      for(let i=0; i<stays.length; i++) {
-        let geocoded = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${elem.location}.json?access_token=${process.env.REACT_APP_MAPBOX_API_KEY}`)
-        let geocoded = geocoded.json();
-        stays[i].coords = geocoded.features[0].geometry.coordinates
-      }
-      
       
       this.setState({
-        "data": {
-          "journeys": journeys,
-        "stays": stays,
+        data: {
+          journeys: journeys,
+          stays: stays,
         }
         // "hotels": hotels.objects,
         // "activities": activities.objects
@@ -114,7 +108,7 @@ class App extends Component {
     if (!this.state.journeys) {
         return null
     }
-    for(let i=0; i<this.state.journeys.length; i++) {
+    for(let i=0; i<this.state.data["journeys"].length; i++) {
       const elem = this.state.data["journeys"][i];
       const id = "journeys-"+i;
       let color = "#"+elem.method.color;
@@ -129,10 +123,10 @@ class App extends Component {
       start_endpoints.push(elem.start.name);
       start_endpoints.push(elem.end.name);
     }
-    for(let i=0; i<this.state.stays.length; i++) {
-      const id = "hotels-"+i;
+    for(let i=0; i<this.state.data["stays"].length; i++) {
+      const id = "stays-"+i;
       hotels.push(<Layer id={id} type="marker" layout={{ "icon-image": "lodging-15" }}>
-      <Feature coordinates={this.state.data["hotels"][i]} onClick={this.onFeatureClick} />
+      <Feature coordinates={[this.state.data["stays"][i].lat,this.state.data["stays"][i].lng]} onClick={this.onFeatureClick} />
     </Layer>)
     }
     if(this.state.popup) {

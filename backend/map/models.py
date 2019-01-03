@@ -20,7 +20,8 @@ class Journey(models.Model):
 
 
 class Stay(models.Model):
-    location = models.CharField(max_length=50, default="")
+    lat = models.FloatField()
+    lng = models.FloatField()
     datetime = models.DateTimeField()
     duration = models.DurationField()
     link = models.URLField(default="https://airbnb.co.uk")

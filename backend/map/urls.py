@@ -24,7 +24,7 @@ class JourneyViewSet(viewsets.ModelViewSet):
 class StaySerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Stay
-        fields = ('location', 'datetime', 'duration', 'link')
+        fields = ('lat', 'lng', 'datetime', 'duration', 'link')
 
 class StayViewSet(viewsets.ModelViewSet):
     queryset = Stay.objects.all()
