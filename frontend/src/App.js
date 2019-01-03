@@ -130,11 +130,15 @@ class App extends Component {
       const id = "journeys-"+i;
       let color = "#"+elem.method.color;
       let lineWidth = 4;
+      let lineOffset = 0;
       if(this.state.selected != "" && this.state.selected != id && this.state.selected != null) {
         lineWidth = 2;
         color = blendColors(color, "#CDCDCD", 0.6);
       }
-     planes.push(<Layer id={id} type="line" paint={{ "line-color": color, "line-width": lineWidth}}>
+      if(elem.method.name == "plane") {
+        lineOffset = 5
+      }
+     planes.push(<Layer id={id} type="line" paint={{ "line-color": color, "line-width": lineWidth, "line-offset": lineOffset}}>
                    <Feature coordinates={elem.coords} onMouseLeave={this.onMouseLeave} onClick={this.onFeatureClick} />
                  </Layer>);
       start_endpoints.push(elem.start.name);
