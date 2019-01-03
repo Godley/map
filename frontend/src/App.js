@@ -69,6 +69,7 @@ class App extends Component {
         journeys[i].coords = []
         journeys[i].coords.push(journeys[i].start_geocode)
         journeys[i].coords.push(journeys[i].end_geocode)
+        journeys[i].summary = {name: `${journeys[i].start} to ${journeys[i].end}`}
         if(journeys[i].method.name !== 'plane' && geocode_start.features.length > 0 && geocode_end.features.length > 0) {
             let start = journeys[i].start_geocode.join(",")
             let end = journeys[i].end_geocode.join(",")
@@ -80,17 +81,24 @@ class App extends Component {
               journeys[i].time_estimate = String(direction_line.routes[0].duration).toHHMMSS()
               journeys[i].distance = direction_line.routes[0].distance / 1000
             }
-            
-          } 
-        
+            journeys[i].summary.time_estimate = journeys[i].time_estimate
+            journeys[i].summary.distance = String(journeys[i].distance) + " km"
+          }
+        let route_info = JSON.parse(data.route_info)
+        for(let field in route_info) {
+          journeys[i].summary[field] = route_info[field]
+        }
       }
       let stays = await fetch("/api/stays/?format=json", options);
       stays = await stays.json();
+      let activities = await fetch("/api/activities/?format=json", options);
+      activities = await activities.json();
       
       this.setState({
         data: {
           journeys: journeys,
           stays: stays,
+          activities: activities,
         }
         // "hotels": hotels.objects,
         // "activities": activities.objects
@@ -151,28 +159,23 @@ class App extends Component {
       <Feature coordinates={[this.state.data["stays"][i].lng,this.state.data["stays"][i].lat]} onMouseLeave={this.onMouseLeave} onClick={this.onFeatureClick} />
     </Layer>)
     }
+    for(let i=0; i<this.state.data["activities"].length; i++) {
+      const id = "activities-"+i;
+      activities.push(<Layer id={id} type="symbol" layout={{ "icon-image": "lodging-15" }}>
+      <Feature coordinates={this.state.data["activities"][i].coords} onMouseLeave={this.onMouseLeave} onClick={this.onFeatureClick} />
+    </Layer>)
+    }
     if(this.state.selected) {
       let indexor = this.state.popup.key.split("-");
       let data = this.state.data[indexor[0]][indexor[1]];
-      let name = data.name;
-      if(!name) {
-        name = data.start + " to " + data.end;
-      }
-      let rows = [];
-      
-      rows.push(<tr><td><b>Date</b></td><td>{data.datetime}</td></tr>)
-      if(indexor[0] == "journeys") {
-        let route_info = JSON.parse(data.route_info)
-        for(let field in route_info) {
-          rows.push(<tr><td><b>{field}</b></td><td>{route_info[field]}</td></tr>)
-        }
-        if(data.method.name != "plane") {
-          rows.push(<tr><td><b>Time estimate</b></td><td>{data.time_estimate}</td></tr>)
-          rows.push(<tr><td><b>Distance</b></td><td>{data.distance} km</td></tr>)
+      if(data.summary) {
+        for(let field in data.summary) {
+          rows.push(<tr><td><b>{field}</b></td><td>{data.summary[field]}</td></tr>);
         }
       } else {
-        rows.push(<tr><td><b>Duration</b></td><td>{data.duration}</td></tr>)
-        rows.push(<tr><td><b>Details</b></td><td><a href={data.link}>Airbnb</a></td></tr>)
+        for(let field in data) {
+          rows.push(<tr><td><b>{field}</b></td><td>{data[field]}</td></tr>);
+        }
       }
         
       popup = <Popup
