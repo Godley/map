@@ -23,7 +23,7 @@ class App extends Component {
       center: [139.767023,35.669256],
       zoom: [5],
       data: {
-        "hotels": [],
+        "stays": [],
       "journeys": [],
       "activities": [],
       },
