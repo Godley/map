@@ -115,12 +115,12 @@ class App extends Component {
       const id = "journeys-"+i;
       let color = "#"+elem.method.color;
       let lineWidth = 4;
-      if(this.state.selected != "" && this.state.selected != id) {
+      if(this.state.selected != "" && this.state.selected != id && this.state.selected != null) {
         lineWidth = 2;
-        color = blendColors(color, "#505050", 0.8);
+        color = blendColors(color, "#CDCDCD", 0.6);
       }
      planes.push(<Layer id={id} type="line" paint={{ "line-color": color, "line-width": lineWidth}}>
-                   <Feature coordinates={elem.coords} onClick={this.onFeatureClick} />
+                   <Feature coordinates={elem.coords} onMouseLeave={this.onMouseLeave} onClick={this.onFeatureClick} />
                  </Layer>);
       start_endpoints.push(elem.start.name);
       start_endpoints.push(elem.end.name);
@@ -140,10 +140,16 @@ class App extends Component {
         name = data.start + " to " + data.end;
       }
       let rows = [];
-      let route_info = JSON.parse(data.route_info)
+      
       rows.push(<tr><td>Date</td><td>{data.datetime}</td></tr>)
-      for(let field in route_info) {
-        rows.push(<tr><td><b>{field}</b></td><td>{route_info[field]}</td></tr>)
+      if(indexor[0] == "journey") {
+        let route_info = JSON.parse(data.route_info)
+        for(let field in route_info) {
+          rows.push(<tr><td><b>{field}</b></td><td>{route_info[field]}</td></tr>)
+        }
+      } else {
+        rows.push(<tr><td><b>Duration</b></td><td>{data.duration}</td></tr>)
+        rows.push(<tr><td><b>Details</b></td><td><a href={data.link}>Airbnb</a></td></tr>)
       }
         
       popup = <Popup
