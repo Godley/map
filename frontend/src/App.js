@@ -84,7 +84,7 @@ class App extends Component {
             journeys[i].summary.time_estimate = journeys[i].time_estimate
             journeys[i].summary.distance = String(journeys[i].distance) + " km"
           }
-        let route_info = JSON.parse(data.route_info)
+        let route_info = JSON.parse(journeys[i].route_info)
         for(let field in route_info) {
           journeys[i].summary[field] = route_info[field]
         }
@@ -168,6 +168,7 @@ class App extends Component {
     if(this.state.selected) {
       let indexor = this.state.popup.key.split("-");
       let data = this.state.data[indexor[0]][indexor[1]];
+      let rows = [];
       if(data.summary) {
         for(let field in data.summary) {
           rows.push(<tr><td><b>{field}</b></td><td>{data.summary[field]}</td></tr>);
