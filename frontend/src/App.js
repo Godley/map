@@ -13,6 +13,18 @@ function blendColors(c0, c1, p) {
   return "#"+(0x1000000+(Math.round((R2-R1)*p)+R1)*0x10000+(Math.round((G2-G1)*p)+G1)*0x100+(Math.round((B2-B1)*p)+B1)).toString(16).slice(1);
 }
 
+String.prototype.toHHMMSS = function () {
+  var sec_num = parseInt(this, 10); // don't forget the second param
+  var hours   = Math.floor(sec_num / 3600);
+  var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
+  var seconds = sec_num - (hours * 3600) - (minutes * 60);
+
+  if (hours   < 10) {hours   = "0"+hours;}
+  if (minutes < 10) {minutes = "0"+minutes;}
+  if (seconds < 10) {seconds = "0"+seconds;}
+  return hours+'hours, '+minutes+'minutes, '+seconds+ ' seconds';
+}
+
 class App extends Component {
   static propTypes = {
     cookies: instanceOf(Cookies).isRequired
@@ -65,7 +77,10 @@ class App extends Component {
             direction_line = await direction_line.json();
             if(direction_line.routes.length > 0) {
               journeys[i].coords = direction_line.routes[0].geometry.coordinates
+              journeys[i].time_estimate = String(direction_line.routes[0].duration).toHHMMSS()
+              journeys[i].distance = direction_line.routes[0].distance / 1000
             }
+            
           } 
         
       }
@@ -141,11 +156,15 @@ class App extends Component {
       }
       let rows = [];
       
-      rows.push(<tr><td>Date</td><td>{data.datetime}</td></tr>)
-      if(indexor[0] == "journey") {
+      rows.push(<tr><td><b>Date</b></td><td>{data.datetime}</td></tr>)
+      if(indexor[0] == "journeys") {
         let route_info = JSON.parse(data.route_info)
         for(let field in route_info) {
           rows.push(<tr><td><b>{field}</b></td><td>{route_info[field]}</td></tr>)
+        }
+        if(data.method.name != "plane") {
+          rows.push(<tr><td><b>Time estimate</b></td><td>{data.time_estimate}</td></tr>)
+          rows.push(<tr><td><b>Distance</b></td><td>{data.distance} km</td></tr>)
         }
       } else {
         rows.push(<tr><td><b>Duration</b></td><td>{data.duration}</td></tr>)
