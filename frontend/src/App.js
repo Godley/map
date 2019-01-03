@@ -123,7 +123,7 @@ class App extends Component {
     for(let i=0; i<this.state.data["stays"].length; i++) {
       const id = "stays-"+i;
       hotels.push(<Layer id={id} type="marker" layout={{ "icon-image": "lodging-15" }}>
-      <Feature coordinates={[this.state.data["stays"][i].lat,this.state.data["stays"][i].lng]} onClick={this.onFeatureClick} />
+      <Feature coordinates={[this.state.data["stays"][i].lng,this.state.data["stays"][i].lat]} onClick={this.onFeatureClick} />
     </Layer>)
     }
     if(this.state.popup) {
