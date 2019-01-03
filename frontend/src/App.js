@@ -117,7 +117,7 @@ class App extends Component {
       let lineWidth = 4;
       if(this.state.selected != "" && this.state.selected != id) {
         lineWidth = 2;
-        color = blendColors(color, "#505050", 0.2);
+        color = blendColors(color, "#505050", 0.8);
       }
      planes.push(<Layer id={id} type="line" paint={{ "line-color": color, "line-width": lineWidth}}>
                    <Feature coordinates={elem.coords} onClick={this.onFeatureClick} />
@@ -169,6 +169,7 @@ class App extends Component {
   zoom={this.state.zoom}>
   {this.state.selected? popup : null}
   {planes}
+  {hotels}
 </ReactMapboxGl>
     );
   }
