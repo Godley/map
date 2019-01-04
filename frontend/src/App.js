@@ -34,11 +34,7 @@ class App extends Component {
     this.state = {
       center: [139.767023,35.669256],
       zoom: [5],
-      data: {
-        "stays": [],
-      "journeys": [],
-      "activities": [],
-      },
+      trips: [],
       "selected": null,
     }
     this.onFeatureClick = this.onFeatureClick.bind(this);
@@ -55,51 +51,48 @@ class App extends Component {
       }
     };
     try {
-      let result = await fetch("/api/journeys/?format=json", options);
-      let journeys = await result.json();
-      for(let i=0; i<journeys.length; i++) {
-        let start_encoded = journeys[i].start.replace(" ", "_")
-        let end_encoded = journeys[i].end.replace(" ", "_")
-        let geocode_start = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${start_encoded}.json?access_token=${process.env.REACT_APP_MAPBOX_API_KEY}`)
-        let geocode_end = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${end_encoded}.json?access_token=${process.env.REACT_APP_MAPBOX_API_KEY}`)
-        geocode_start = await geocode_start.json();
-        geocode_end = await geocode_end.json();
-        journeys[i].start_geocode = geocode_start.features[0].geometry.coordinates
-        journeys[i].end_geocode = geocode_end.features[0].geometry.coordinates
-        journeys[i].coords = []
-        journeys[i].coords.push(journeys[i].start_geocode)
-        journeys[i].coords.push(journeys[i].end_geocode)
-        journeys[i].summary = {name: `${journeys[i].start} to ${journeys[i].end}`}
-        if(journeys[i].method.name !== 'plane' && geocode_start.features.length > 0 && geocode_end.features.length > 0) {
-            let start = journeys[i].start_geocode.join(",")
-            let end = journeys[i].end_geocode.join(",")
-            let full_coords = `${start};${end}`
-            let direction_line = await fetch(`https://api.mapbox.com/directions/v5/mapbox/driving/${full_coords}?approaches=curb;curb&geometries=geojson&steps=true&access_token=${process.env.REACT_APP_MAPBOX_API_KEY}`)
-            direction_line = await direction_line.json();
-            if(direction_line.routes.length > 0) {
-              journeys[i].coords = direction_line.routes[0].geometry.coordinates
-              journeys[i].time_estimate = String(direction_line.routes[0].duration).toHHMMSS()
-              journeys[i].distance = direction_line.routes[0].distance / 1000
+      let result = await fetch("/api/trips/?format=json", options);
+      let trips = await result.json();
+      for(let i=0; i<trips.length; i++) {
+        for(let j=0; j<trips[i].journeys.length; j++) {
+          let start_encoded = trips[i].journeys[j].start.replace(" ", "_")
+          let end_encoded = trips[i].journeys[j].end.replace(" ", "_")
+          let geocode_start = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${trips[i].country} ${start_encoded}.json?access_token=${process.env.REACT_APP_MAPBOX_API_KEY}`)
+          let geocode_end = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${trips[i].country} ${end_encoded}.json?access_token=${process.env.REACT_APP_MAPBOX_API_KEY}`)
+          geocode_start = await geocode_start.json();
+          geocode_end = await geocode_end.json();
+          trips[i].journeys[j].start_geocode = geocode_start.features[0].geometry.coordinates
+          trips[i].journeys[j].end_geocode = geocode_end.features[0].geometry.coordinates
+          trips[i].journeys[j].coords = []
+          trips[i].journeys[j].coords.push(trips[i].journeys[j].start_geocode)
+          trips[i].journeys[j].coords.push(trips[i].journeys[j].end_geocode)
+          trips[i].journeys[j].name = `${trips[i].journeys[j].start} to ${trips[i].journeys[j].end}`
+          trips[i].journeys[j].summary = {}
+          if(trips[i].journeys[j].method.name !== 'plane' && geocode_start.features.length > 0 && geocode_end.features.length > 0) {
+              let start = trips[i].journeys[j].start_geocode.join(",")
+              let end = trips[i].journeys[j].end_geocode.join(",")
+              let full_coords = `${start};${end}`
+              let direction_line = await fetch(`https://api.mapbox.com/directions/v5/mapbox/driving/${full_coords}?approaches=curb;curb&geometries=geojson&steps=true&access_token=${process.env.REACT_APP_MAPBOX_API_KEY}`)
+              direction_line = await direction_line.json();
+              if(direction_line.routes.length > 0) {
+                trips[i].journeys[j].coords = direction_line.routes[0].geometry.coordinates
+                trips[i].journeys[j].time_estimate = String(direction_line.routes[0].duration).toHHMMSS()
+                trips[i].journeys[j].distance = direction_line.routes[0].distance / 1000
+                trips[i].journeys[j].summary.time_estimate = trips[i].journeys[j].time_estimate
+                trips[i].journeys[j].summary.distance = String(trips[i].journeys[j].distance) + " km"
+              }
             }
-            journeys[i].summary.time_estimate = journeys[i].time_estimate
-            journeys[i].summary.distance = String(journeys[i].distance) + " km"
+          let route_info = JSON.parse(trips[i].journeys[j].route_info)
+          for(let field in route_info) {
+            trips[i].journeys[j].summary[field] = route_info[field]
           }
-        let route_info = JSON.parse(journeys[i].route_info)
-        for(let field in route_info) {
-          journeys[i].summary[field] = route_info[field]
+          trips[i].journeys[j].summary.day = trips[i].journeys[j].day
         }
       }
-      let stays = await fetch("/api/stays/?format=json", options);
-      stays = await stays.json();
-      let activities = await fetch("/api/activities/?format=json", options);
-      activities = await activities.json();
+      
       
       this.setState({
-        data: {
-          journeys: journeys,
-          stays: stays,
-          activities: activities,
-        }
+        trips: trips
         // "hotels": hotels.objects,
         // "activities": activities.objects
       });
@@ -132,42 +125,43 @@ class App extends Component {
     let trains = [];
     let activities = [];
     let popup;
-
-    for(let i=0; i<this.state.data["journeys"].length; i++) {
-      const elem = this.state.data["journeys"][i];
-      const id = "journeys-"+i;
-      let color = "#"+elem.method.color;
-      let lineWidth = 4;
-      let lineOffset = 0;
-      if(this.state.selected != "" && this.state.selected != id && this.state.selected != null) {
-        lineWidth = 2;
-        color = blendColors(color, "#CDCDCD", 0.6);
+    for(let i=0; i<this.state.trips.length; i++) {
+      for(let j=0; j<this.state.trips[i].journeys.length; j++) {
+        const elem = this.state.trips[i].journeys[j];
+        const id = `${i}-journeys-${j}`;
+        let color = "#"+elem.method.color;
+        let lineWidth = 4;
+        let lineOffset = 0;
+        if(this.state.selected != "" && this.state.selected != id && this.state.selected != null) {
+          lineWidth = 2;
+          color = blendColors(color, "#CDCDCD", 0.6);
+        }
+        if(elem.method.name == "plane") {
+          lineOffset = 5
+        }
+       planes.push(<Layer id={id} type="line" paint={{ "line-color": color, "line-width": lineWidth, "line-offset": lineOffset}}>
+                     <Feature coordinates={elem.coords} onMouseLeave={this.onMouseLeave} onClick={this.onFeatureClick} />
+                   </Layer>);
+        start_endpoints.push(elem.start.name);
+        start_endpoints.push(elem.end.name);
       }
-      if(elem.method.name == "plane") {
-        lineOffset = 5
+      for(let j=0; j<this.state.trips[i].stays.length; j++) {
+        const id = `${i}-stays-${j}`;
+        hotels.push(<Layer id={id} type="symbol" layout={{ "icon-image": "lodging-15" }}>
+        <Feature coordinates={[this.state.trips[i].stays[j].lng,this.state.trips[i].stays[j].lat]} onMouseLeave={this.onMouseLeave} onClick={this.onFeatureClick} />
+      </Layer>)
       }
-     planes.push(<Layer id={id} type="line" paint={{ "line-color": color, "line-width": lineWidth, "line-offset": lineOffset}}>
-                   <Feature coordinates={elem.coords} onMouseLeave={this.onMouseLeave} onClick={this.onFeatureClick} />
-                 </Layer>);
-      start_endpoints.push(elem.start.name);
-      start_endpoints.push(elem.end.name);
+      for(let j=0; j<this.state.trips[i].activities.length; j++) {
+        const id = `${i}-activities-${j}`;
+        activities.push(<Layer id={id} type="symbol" layout={{ "icon-image": "lodging-15" }}>
+        <Feature coordinates={this.state.trips[i].activities[j].coords} onMouseLeave={this.onMouseLeave} onClick={this.onFeatureClick} />
+      </Layer>)
+      }
     }
-    for(let i=0; i<this.state.data["stays"].length; i++) {
-      const id = "stays-"+i;
-      console.log(this.state.data["stays"][i].lng,this.state.data["stays"][i].lat)
-      hotels.push(<Layer id={id} type="symbol" layout={{ "icon-image": "lodging-15" }}>
-      <Feature coordinates={[this.state.data["stays"][i].lng,this.state.data["stays"][i].lat]} onMouseLeave={this.onMouseLeave} onClick={this.onFeatureClick} />
-    </Layer>)
-    }
-    for(let i=0; i<this.state.data["activities"].length; i++) {
-      const id = "activities-"+i;
-      activities.push(<Layer id={id} type="symbol" layout={{ "icon-image": "lodging-15" }}>
-      <Feature coordinates={this.state.data["activities"][i].coords} onMouseLeave={this.onMouseLeave} onClick={this.onFeatureClick} />
-    </Layer>)
-    }
+    
     if(this.state.selected) {
       let indexor = this.state.popup.key.split("-");
-      let data = this.state.data[indexor[0]][indexor[1]];
+      let data = this.state.trips[indexor[0]][indexor[1]][indexor[2]];
       let rows = [];
       if(data.summary) {
         for(let field in data.summary) {
@@ -175,14 +169,18 @@ class App extends Component {
         }
       } else {
         for(let field in data) {
-          rows.push(<tr><td><b>{field}</b></td><td>{data[field]}</td></tr>);
+          if(field == "link") {
+            rows.push(<tr><td><b>{field}</b></td><td><a href={data[field]}>link</a></td></tr>);
+          } else {
+            rows.push(<tr><td><b>{field}</b></td><td>{data[field]}</td></tr>);
+          }
         }
       }
         
       popup = <Popup
                 coordinates={this.state.popup.coords}
                 anchor="bottom-right">
-                <h2>{name}</h2>
+                <h2>{data.name}</h2>
                 <table>
                   <tbody>
                     {rows}

@@ -1,39 +1,54 @@
-from map.models import Journey, Transport, Stay
+from map.models import Journey, Transport, Stay, Activity, Trip
 from django.conf.urls import url, include
 from django.contrib.auth.models import User
 from rest_framework import routers, serializers, viewsets
 
-class TransportSerializer(serializers.HyperlinkedModelSerializer):
+
+class TransportSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transport
         fields = ('name', 'color')
 
+
 # Serializers define the API representation.
-class JourneySerializer(serializers.HyperlinkedModelSerializer):
+class JourneySerializer(serializers.ModelSerializer):
     method = TransportSerializer()
 
     class Meta:
         model = Journey
-        fields = ('start', 'end', 'datetime', 'method', 'route_info')
+        fields = ('start', 'end', 'day', 'method', 'route_info')
 
-# ViewSets define the view behavior.
-class JourneyViewSet(viewsets.ModelViewSet):
-    queryset = Journey.objects.all()
-    serializer_class = JourneySerializer
 
-class StaySerializer(serializers.HyperlinkedModelSerializer):
+class StaySerializer(serializers.ModelSerializer):
     class Meta:
         model = Stay
-        fields = ('lat', 'lng', 'datetime', 'duration', 'link')
+        fields = ('lat', 'lng', 'day', 'link', 'name', 'end_day')
 
-class StayViewSet(viewsets.ModelViewSet):
-    queryset = Stay.objects.all()
-    serializer_class = StaySerializer
+
+class ActivitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Activity
+        fields = ('name', 'day', 'cost', 'link')
+
+
+class TripSerializer(serializers.ModelSerializer):
+    journeys = JourneySerializer(many=True)
+    stays = StaySerializer(many=True)
+    activities = ActivitySerializer(many=True)
+
+    class Meta:
+        model = Trip
+        fields = ('start_date', 'end_date', 'country', 'journeys', 'activities', 'stays')
+
+
+class TripViewSet(viewsets.ModelViewSet):
+    queryset = Trip.objects.all()
+    serializer_class = TripSerializer
+
 
 # Routers provide an easy way of automatically determining the URL conf.
 router = routers.DefaultRouter()
-router.register(r'journeys', JourneyViewSet)
-router.register(r'stays', StayViewSet)
+router.register(r'trips', TripViewSet)
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
